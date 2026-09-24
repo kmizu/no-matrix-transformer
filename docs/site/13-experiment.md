@@ -65,7 +65,7 @@ CLI で 8000 ステップ学習したパラメータを `src/main/resources/pret
 sbt "runMain nomatrix.Main train --steps 8000 --pairs 64 --sigma 0.02 --lr 0.003 --windows 8 --seed 7"
 ```
 
-手元（ノート PC の CPU、1 コア）での学習ログの抜粋です。損失は学習に使っていない固定の 64 窓で測っています。
+手元（ノート PC の CPU、1 コア）での学習ログの抜粋です。損失は評価用に固定した 64 窓（同じコーパスから、学習の窓とは別に引いたもの）で測っています。
 
 --8<-- "docs/site/snippets/evolution.md"
 
