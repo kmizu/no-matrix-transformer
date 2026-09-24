@@ -26,8 +26,8 @@ class LayersTest extends munit.FunSuite:
     val y = dense(Vec.fromDoubles(Seq(1.0, -1.0, 0.5)))
     assertEquals(y.length, 2)
     val g = pv.gradients(Value.gradients(Value.sum(y)))
-    assert(g.values.forall(v => v != 0.0 || true)) // バイアスの勾配は必ず 1
-    assertEqualsDouble(g("d.n0.b"), 1.0, 1e-9)
+    assert(g.keys.forall(_.startsWith("d.")))
+    assertEqualsDouble(g("d.n0.b"), 1.0, 1e-9) // バイアスの勾配は必ず 1
     assertEqualsDouble(g("d.n0.w2"), 0.5, 1e-9)
   }
 

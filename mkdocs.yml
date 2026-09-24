@@ -8,6 +8,8 @@ copyright: Copyright &copy; 2026 Kota Mizushima
 
 docs_dir: target/mdoc
 site_dir: target/site
+exclude_docs: |
+  snippets/
 
 theme:
   name: material

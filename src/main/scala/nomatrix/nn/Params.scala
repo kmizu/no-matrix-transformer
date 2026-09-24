@@ -32,8 +32,9 @@ object Params:
 
   def parse(text: String): Params =
     val entries = text.linesIterator.filter(_.trim.nonEmpty).map { line =>
-      val Array(n, d) = line.trim.split(" ", 2)
-      n -> d.toDouble
+      line.trim.split(" ", 2) match
+        case Array(n, d) => n -> d.toDouble
+        case _           => throw new IllegalArgumentException(s"読めない行: $line")
     }
     Params(entries.toMap)
 

@@ -42,7 +42,7 @@ final case class Config(vocabSize: Int, dModel: Int, heads: Int, layers: Int, co
 
 | 名前 | 値 | 意味 |
 |---|---|---|
-| `vocabSize` | コーパスによる（約 50） | 文字の種類 |
+| `vocabSize` | コーパスによる（同梱コーパスでは 64） | 文字の種類 |
 | `dModel` | 16 | 各トークンのベクトルの長さ |
 | `heads` | 2 | 注意ヘッドの数（各 8 次元） |
 | `layers` | 2 | ブロックの段数 |
