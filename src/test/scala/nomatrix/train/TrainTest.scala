@@ -52,6 +52,23 @@ class EvolutionTest extends munit.FunSuite:
     assertEqualsDouble(plain(0), 1.0, 0.2)
   }
 
+  test("groups を指定すると、その組のパラメータしか動かない") {
+    val lossOf = (p: Array[Double]) => p.map(x => x * x).sum
+    val settings = Evolution.Settings(pairs = 4, sigma = 0.1, lr = 0.05, groups = Vector(Vector(0), Vector(1)))
+    val start = Array(3.0, 3.0, 3.0)
+    val (after1, state1, _) = Evolution.step(start, lossOf, settings, Evolution.State.initial(3), new Random(0))
+    assert(after1(0) != 3.0 && after1(1) == 3.0 && after1(2) == 3.0)
+    val (after2, _, _) = Evolution.step(after1, lossOf, settings, state1, new Random(0))
+    assert(after2(0) == after1(0) && after2(1) != 3.0 && after2(2) == 3.0)
+  }
+
+  test("lineSearch は歩幅を半分・そのまま・倍から選び、損失が下がらない歩幅は選ばない") {
+    val lossOf = (p: Array[Double]) => (p(0) - 1.0) * (p(0) - 1.0)
+    val plain = minimize(lossOf, Array(-3.0), Evolution.Settings(pairs = 8, sigma = 0.1, lr = 0.02), 100)
+    val searched = minimize(lossOf, Array(-3.0), Evolution.Settings(pairs = 8, sigma = 0.1, lr = 0.02, lineSearch = true), 100)
+    assert(math.abs(searched(0) - 1.0) <= math.abs(plain(0) - 1.0) + 0.1, s"plain=${plain(0)} searched=${searched(0)}")
+  }
+
   test("ステップは試したゆらぎの平均損失を返す") {
     val (_, _, mean) = Evolution.step(Array(0.0), p => p(0) * p(0), Evolution.Settings(pairs = 4, sigma = 1.0), Evolution.State.initial(1), new Random(1))
     assert(mean > 0.0)

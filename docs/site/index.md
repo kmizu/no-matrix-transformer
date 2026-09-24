@@ -32,7 +32,7 @@ Transformer の解説を開くと、たいてい最初に \( Q K^\top / \sqrt{d_
     ソースコードの本線に、行列型（2 次元配列）も行列積も、微分も登場しません。
     行列の約束は[テストで機械的に検査](https://github.com/kmizu/no-matrix-transformer/blob/main/src/test/scala/nomatrix/NoMatrixTest.scala)されています。
     登場するのは `Double`（ただの数）と「数の並び」 `Vector[Double]` だけです。
-    微分を使う速い学習法は[付録](15-backprop.md)に隔離してあり、本線と同じ答えを出すことをテストで確かめています。
+    逆伝播（速い学習法）は[付録](15-backprop.md)に隔離してあり、そこでも微分の公式は使わず「部品の傾きを測って、掛けて、足す」だけで組み立てています。本線と同じ答えを出すことはテストで確かめています。
 
 ## 何ができあがるか
 
