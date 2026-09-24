@@ -1,0 +1,91 @@
+site_name: 行列を使わない Transformer 入門
+site_description: 行列計算ゼロの Scala プログラムとして小さな言語モデルを組み立てながら、Transformer を理解する
+site_url: https://kmizu.github.io/no-matrix-transformer/
+repo_url: https://github.com/kmizu/no-matrix-transformer
+repo_name: kmizu/no-matrix-transformer
+edit_uri: edit/main/docs/site/
+copyright: Copyright &copy; 2026 Kota Mizushima
+
+docs_dir: target/mdoc
+site_dir: target/site
+
+theme:
+  name: material
+  language: ja
+  font:
+    text: Noto Sans JP
+    code: JetBrains Mono
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: ダークモードへ
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: ライトモードへ
+  features:
+    - navigation.footer
+    - navigation.top
+    - navigation.tracking
+    - content.code.copy
+    - content.code.annotate
+    - search.highlight
+    - search.suggest
+    - toc.follow
+
+nav:
+  - はじめに: index.md
+  - 第1章 準備: 01-setup.md
+  - 第2章 微分できる数: 02-value.md
+  - 第3章 ベクトルは数の並び: 03-vec.md
+  - 第4章 ニューロンと Dense: 04-dense.md
+  - 第5章 トークンと埋め込み: 05-embedding.md
+  - 第6章 位置を知る: 06-position.md
+  - 第7章 注意: 07-attention.md
+  - 第8章 複数の視点: 08-multihead.md
+  - 第9章 FeedForward・残差・LayerNorm: 09-block.md
+  - 第10章 ブロックを積む: 10-transformer.md
+  - 第11章 損失と学習: 11-training.md
+  - 第12章 文章を生成する: 12-generate.md
+  - 第13章 実際に学習させる: 13-experiment.md
+  - 第14章 行列はどこにいたのか: 14-epilogue.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: ["."]
+      check_paths: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+plugins:
+  - search:
+      lang: ja
