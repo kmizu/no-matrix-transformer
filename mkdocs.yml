@@ -13,22 +13,21 @@ exclude_docs: |
 
 theme:
   name: material
+  custom_dir: overrides
   language: ja
-  font:
-    text: Noto Sans JP
-    code: JetBrains Mono
+  font: false
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: deep purple
-      accent: amber
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-night
         name: ダークモードへ
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: deep purple
-      accent: amber
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: ライトモードへ
@@ -83,6 +82,9 @@ markdown_extensions:
       generic: true
   - pymdownx.tabbed:
       alternate_style: true
+
+extra_css:
+  - stylesheets/nomatrix.css
 
 extra_javascript:
   - javascripts/mathjax.js

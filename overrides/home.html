@@ -1,0 +1,32 @@
+{% extends "main.html" %}
+
+{% block content %}
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-text">
+    <p class="hero-kicker">行列計算ゼロの Scala で、小さな言語モデルを組み立てる</p>
+    <h1 id="hero-title" class="hero-title">行列を使わない<br>Transformer 入門</h1>
+    <p class="hero-lead">行列は、名前のない数を格子に並べただけのもの。ひとつずつ名前を付けて、かけて、足す。それだけで言語モデルは動きます。このサイトのコードは、ページを作るたびに実際にコンパイルされ、学習し、文章を書いています。</p>
+    <p class="hero-actions">
+      <a class="hero-button" href="01-setup/">第1章から読む</a>
+      <a class="hero-link" href="https://github.com/kmizu/no-matrix-transformer">コードを見る</a>
+    </p>
+  </div>
+  <figure class="hero-fig" aria-label="行列の括弧が消えて、それぞれの数に名前が付く様子">
+    <span class="bracket bracket-l" aria-hidden="true"></span>
+    <span class="bracket bracket-r" aria-hidden="true"></span>
+    <span class="cell" style="--gx:0;--gy:0;--i:0"><span class="name">tok.t3.d0</span><span class="num">0.31</span></span>
+    <span class="cell" style="--gx:1;--gy:0;--i:1"><span class="name">tok.t3.d1</span><span class="num">-0.12</span></span>
+    <span class="cell" style="--gx:2;--gy:0;--i:2"><span class="name">tok.t3.d2</span><span class="num">0.08</span></span>
+    <span class="cell" style="--gx:0;--gy:1;--i:3"><span class="name">attn.head0.query.n1.w0</span><span class="num">0.44</span></span>
+    <span class="cell" style="--gx:1;--gy:1;--i:4"><span class="name">attn.head0.query.n1.w1</span><span class="num">-0.27</span></span>
+    <span class="cell" style="--gx:2;--gy:1;--i:5"><span class="name">attn.head0.query.n1.b</span><span class="num">0.00</span></span>
+    <span class="cell" style="--gx:0;--gy:2;--i:6"><span class="name">ff.up.n7.w2</span><span class="num">-0.19</span></span>
+    <span class="cell" style="--gx:1;--gy:2;--i:7"><span class="name">ff.up.n7.w3</span><span class="num">0.52</span></span>
+    <span class="cell" style="--gx:2;--gy:2;--i:8"><span class="name">head.n41.b</span><span class="num">0.03</span></span>
+    <figcaption class="hero-caption">格子の中の数に、ひとつずつ名前が付く</figcaption>
+  </figure>
+</section>
+<div class="home-body">
+  {{ page.content }}
+</div>
+{% endblock %}

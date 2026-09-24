@@ -4,12 +4,16 @@
 
 ## 設定
 
-```scala mdoc
+```scala mdoc:silent
 import nomatrix.data.Corpus
 import nomatrix.model.Transformer
 
 val tok = Corpus.tokenizer
 val cfg = Corpus.defaultConfig(tok.vocabSize)
+```
+
+```scala mdoc
+tok.chars.mkString
 cfg
 Transformer.parameterCount(cfg)
 ```

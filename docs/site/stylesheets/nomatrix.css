@@ -1,0 +1,336 @@
+@import url("https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=M+PLUS+1+Code:wght@400;500&display=swap");
+
+/* ---------- tokens ---------- */
+:root {
+  --paper: #f5f6f2;
+  --paper-2: #eceee7;
+  --ink: #1b2a41;
+  --ink-2: #4a5568;
+  --grid: #d9dfd8;
+  --moon: #c9a227;
+  --moon-deep: #9a7a12;
+  --sky: #7fa7c4;
+  --sky-deep: #3f6f93;
+  --code-bg: #eef1ea;
+  --font-display: "Klee One", "Zen Kaku Gothic New", sans-serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  --font-code: "M PLUS 1 Code", "JetBrains Mono", ui-monospace, monospace;
+}
+
+[data-md-color-scheme="slate"] {
+  --paper: #141b27;
+  --paper-2: #1b2431;
+  --ink: #e8ebe4;
+  --ink-2: #aeb6c2;
+  --grid: #26303f;
+  --moon: #dfb43a;
+  --moon-deep: #f0cc5e;
+  --sky: #7fa7c4;
+  --sky-deep: #9fc3dc;
+  --code-bg: #0f1520;
+}
+
+/* Material の色変数を紙と墨に寄せる */
+[data-md-color-primary="custom"],
+[data-md-color-accent="custom"] {
+  --md-primary-fg-color: var(--ink);
+  --md-primary-fg-color--light: var(--ink-2);
+  --md-primary-fg-color--dark: var(--ink);
+  --md-primary-bg-color: var(--paper);
+  --md-accent-fg-color: var(--moon-deep);
+  --md-accent-fg-color--transparent: rgba(201, 162, 39, 0.12);
+  --md-default-bg-color: var(--paper);
+  --md-default-fg-color: var(--ink);
+  --md-default-fg-color--light: var(--ink-2);
+  --md-default-fg-color--lighter: var(--grid);
+  --md-default-fg-color--lightest: var(--paper-2);
+  --md-typeset-a-color: var(--sky-deep);
+  --md-code-bg-color: var(--code-bg);
+  --md-code-fg-color: var(--ink);
+  --md-typeset-table-color: var(--grid);
+  --md-footer-bg-color: var(--paper-2);
+  --md-footer-bg-color--dark: var(--paper-2);
+  --md-footer-fg-color: var(--ink);
+  --md-footer-fg-color--light: var(--ink-2);
+  --md-footer-fg-color--lighter: var(--ink-2);
+}
+
+/* ---------- 紙と方眼 ---------- */
+body {
+  font-family: var(--font-body);
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 2rem 2rem;
+  background-position: -1px -1px;
+}
+
+.md-header {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: none;
+  border-bottom: 1px solid var(--grid);
+}
+.md-header__title { font-family: var(--font-display); font-weight: 600; }
+.md-header__button.md-logo { display: none; }
+.md-search__form { background: var(--paper-2); border-radius: 2px; }
+.md-search__input::placeholder, .md-search__icon { color: var(--ink-2); }
+
+.md-main__inner { margin-top: 0; }
+.md-content { background: var(--paper); }
+.md-sidebar { background: transparent; }
+.md-nav__link:hover, .md-nav__link--active { color: var(--moon-deep); }
+.md-nav__title { font-family: var(--font-display); font-weight: 600; }
+
+/* ---------- 本文の組み ---------- */
+.md-typeset {
+  font-size: 0.86rem;
+  line-height: 1.95;
+  letter-spacing: 0.01em;
+}
+.md-content__inner { max-width: 44rem; }
+.md-typeset p { max-width: 38em; }
+.md-typeset ul, .md-typeset ol { max-width: 38em; }
+
+.md-typeset h1, .md-typeset h2, .md-typeset h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+.md-typeset h1 { font-size: 2rem; line-height: 1.35; margin-bottom: 1.6rem; }
+.md-typeset h2 {
+  font-size: 1.4rem;
+  line-height: 1.45;
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--grid);
+}
+.md-typeset h3 { font-size: 1.1rem; margin-top: 2rem; }
+.md-typeset h1 .headerlink, .md-typeset h2 .headerlink, .md-typeset h3 .headerlink { color: var(--grid); }
+
+.md-typeset a { text-decoration: underline; text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+.md-typeset a:hover { color: var(--moon-deep); }
+.md-typeset strong { font-weight: 700; color: var(--ink); }
+
+/* コード */
+.md-typeset code, .md-typeset pre, .md-typeset kbd {
+  font-family: var(--font-code);
+  font-feature-settings: "liga" 0;
+}
+.md-typeset pre > code { font-size: 0.78rem; line-height: 1.7; }
+.md-typeset .highlight { border: 1px solid var(--grid); border-radius: 2px; }
+.md-typeset .highlight pre { background: var(--code-bg); }
+.md-typeset code { background: var(--code-bg); border-radius: 2px; padding: 0.05em 0.3em; }
+/* mdoc の実行結果はコメント行で出る。少し色を変えて「出力」と分かるように */
+.md-typeset .highlight .c1, .md-typeset .highlight .cm { color: var(--sky-deep); font-style: normal; }
+.md-typeset .highlight .k, .md-typeset .highlight .kd { color: var(--ink); font-weight: 500; }
+.md-typeset .highlight .s, .md-typeset .highlight .sb, .md-typeset .highlight .s2 { color: var(--moon-deep); }
+.md-typeset .highlight .nb, .md-typeset .highlight .nf { color: var(--ink); }
+.md-typeset .highlight .m, .md-typeset .highlight .mf, .md-typeset .highlight .mi { color: var(--ink); }
+.md-clipboard { color: var(--ink-2); }
+
+/* 表 */
+.md-typeset table:not([class]) {
+  font-size: 0.8rem;
+  border: 0;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  box-shadow: none;
+}
+.md-typeset table:not([class]) th {
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  border-bottom: 1px solid var(--grid);
+}
+.md-typeset table:not([class]) td { border-top: 1px solid var(--grid); }
+
+/* 注記と「この章のまとめ」 */
+.md-typeset .admonition, .md-typeset details {
+  border: 0;
+  border-left: 3px solid var(--sky);
+  border-radius: 0;
+  background: var(--paper-2);
+  box-shadow: none;
+  font-size: 0.82rem;
+}
+.md-typeset .admonition-title, .md-typeset summary {
+  background: transparent;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--ink);
+}
+.md-typeset .admonition-title::before, .md-typeset summary::before { display: none; }
+.md-typeset .admonition-title, .md-typeset summary { padding-left: 1rem; }
+.md-typeset .admonition.tip { border-left-color: var(--moon); }
+.md-typeset .admonition.tip .admonition-title { color: var(--moon-deep); }
+
+/* 数式 */
+.md-typeset .arithmatex { font-size: 1.02em; }
+
+/* Mermaid を紙に馴染ませる */
+.md-typeset .mermaid { background: transparent; }
+
+/* ---------- トップページ ---------- */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 2.5rem 3rem;
+  align-items: center;
+  max-width: 62rem;
+  margin: 2.5rem auto 3rem;
+  padding: 0 1rem;
+}
+.hero-kicker {
+  font-family: var(--font-display);
+  color: var(--ink-2);
+  margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2rem, 4.2vw, 3.1rem);
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin: 0 0 1.2rem;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+.hero-lead {
+  font-size: 0.92rem;
+  line-height: 1.95;
+  max-width: 34em;
+  color: var(--ink);
+  margin: 0 0 1.6rem;
+}
+.hero-actions { display: flex; gap: 1.4rem; align-items: center; margin: 0; flex-wrap: wrap; }
+.hero-button {
+  display: inline-block;
+  padding: 0.65rem 1.3rem;
+  background: var(--ink);
+  color: var(--paper) !important;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none !important;
+  border-radius: 2px;
+  border: 1px solid var(--ink);
+}
+.hero-button:hover, .hero-button:focus-visible { background: var(--moon-deep); border-color: var(--moon-deep); }
+.hero-link { font-family: var(--font-display); font-size: 0.95rem; color: var(--sky-deep); }
+
+/* 行列の括弧が消え、数に名前が付く */
+.hero-text { min-width: 0; }
+.md-typeset .hero-fig,
+.hero-fig {
+  --u: 1rem;
+  position: relative;
+  height: 22.5em;
+  margin: 0;
+  font-size: var(--u);
+  font-family: var(--font-code);
+  text-align: left;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+.bracket {
+  position: absolute;
+  top: 1.2em;
+  width: 0.6em;
+  height: 10.4em;
+  border: 2px solid var(--moon);
+  animation: bracket-fade 1.2s ease-out 1.6s both;
+}
+.bracket-l { left: 2.4em; border-right: 0; }
+.bracket-r { left: 17.4em; border-left: 0; }
+.cell {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  color: var(--ink);
+  font-size: 1.05em;
+  /* 格子の位置 → 名前付きの数の位置 */
+  --grid-x: calc(3.4em + var(--gx) * 4.4em);
+  --grid-y: calc(2.2em + var(--gy) * 3.6em);
+  --list-x: 0em;
+  --list-y: calc(0.6em + var(--i) * 2.05em);
+  transform: translate(var(--list-x), var(--list-y));
+  animation: escape 1.4s cubic-bezier(0.5, 0, 0.2, 1) both;
+  animation-delay: calc(1.8s + var(--i) * 0.07s);
+}
+.cell .name {
+  position: absolute;
+  left: 6.4em;
+  top: 0.15em;
+  font-size: 0.8em;
+  color: var(--sky-deep);
+  text-align: left;
+  animation: name-in 0.8s ease-out both;
+  animation-delay: calc(2.9s + var(--i) * 0.07s);
+}
+.cell .num {
+  display: inline-block;
+  min-width: 5ch;
+  text-align: right;
+  font-weight: 500;
+}
+.md-typeset .hero-caption,
+.hero-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  text-align: left;
+  bottom: -0.4em;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  animation: name-in 0.8s ease-out 3.4s both;
+}
+
+@keyframes escape {
+  from { transform: translate(var(--grid-x), var(--grid-y)); }
+  to   { transform: translate(var(--list-x), var(--list-y)); }
+}
+@keyframes bracket-fade {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes name-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.home-body { max-width: 44rem; margin: 0 auto; padding: 0 1rem 3rem; }
+.home-body > h1:first-child { display: none; }
+
+@media (max-width: 60em) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 2rem; margin-top: 1.5rem; }
+  .hero-lead { max-width: 100%; }
+  .hero-fig { --u: 0.8rem; height: 21em; }
+}
+@media (max-width: 30em) {
+  .hero-fig { --u: 0.68rem; }
+  .hero-title { font-size: 1.85rem; }
+  body { background-size: 1.5rem 1.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell, .cell .name, .hero-caption, .bracket { animation: none; }
+  .bracket { opacity: 0; }
+}
+
+/* キーボードフォーカス */
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--moon-deep);
+  outline-offset: 2px;
+}

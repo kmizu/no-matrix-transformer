@@ -1,7 +1,11 @@
-# 行列を使わない Transformer 入門
+---
+template: home.html
+hide:
+  - navigation
+  - toc
+---
 
-**行列を一度も書かずに**、Transformer ベースの小さな言語モデル（SLM）を Scala で組み立てます。
-このサイトに載っているコードは、すべて実際にコンパイル・実行され、その出力がそのまま埋め込まれています。
+# 行列を使わない Transformer 入門
 
 ## なぜ行列を使わないのか
 
