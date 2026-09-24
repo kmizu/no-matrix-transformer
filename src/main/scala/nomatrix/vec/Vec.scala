@@ -24,6 +24,11 @@ object Vec:
     sameLength(a, b)
     a.zip(b).map(_ - _)
 
+  /** 要素ごとの掛け算。 */
+  def mul(a: Vec, b: Vec): Vec =
+    sameLength(a, b)
+    a.zip(b).map(_ * _)
+
   /** 全要素を同じ数倍する。 */
   def scale(v: Vec, k: Double): Vec = v.map(_ * k)
 

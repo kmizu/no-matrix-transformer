@@ -18,6 +18,12 @@ class VecTest extends munit.FunSuite:
     assertEquals(Vec.data(Vec.scale(a, 3.0)), Vector(3.0, 6.0))
   }
 
+  test("mul は要素ごとの掛け算") {
+    val a = Vec.fromDoubles(Seq(2.0, 3.0))
+    val b = Vec.fromDoubles(Seq(4.0, 5.0))
+    assertEquals(Vec.data(Vec.mul(a, b)), Vector(8.0, 15.0))
+  }
+
   test("長さが違うベクトルの add は例外") {
     val a = Vec.fromDoubles(Seq(1.0))
     val b = Vec.fromDoubles(Seq(1.0, 2.0))
