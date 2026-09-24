@@ -1,7 +1,5 @@
 package nomatrix.nn
 
-import nomatrix.autograd.Value
-
 class ParamsTest extends munit.FunSuite:
 
   test("Params は名前付きの数の集まりで、結合できる") {
@@ -16,19 +14,14 @@ class ParamsTest extends munit.FunSuite:
     intercept[IllegalArgumentException](Params(Map("x" -> 1.0)) ++ Params(Map("x" -> 2.0)))
   }
 
-  test("lift すると名前付きの葉 Value になり、勾配を名前で取り出せる") {
-    val p = Params(Map("w" -> 3.0, "b" -> 1.0, "unused" -> 9.0))
-    val pv = p.lift
-    assertEquals(pv("w").label, "w")
-    val y = pv("w") * 2.0 + pv("b")
-    val grads = pv.gradients(Value.gradients(y))
-    assertEqualsDouble(grads("w"), 2.0, 1e-9)
-    assertEqualsDouble(grads("b"), 1.0, 1e-9)
-    assertEqualsDouble(grads("unused"), 0.0, 1e-9)
-  }
-
-  test("存在しない名前は例外") {
-    intercept[NoSuchElementException](Params(Map.empty).lift("nope"))
+  test("updated は名前の数だけを変え、存在しない名前は例外") {
+    val p = Params(Map("w" -> 3.0, "b" -> 1.0))
+    val q = p.updated("w", 5.0)
+    assertEquals(q("w"), 5.0)
+    assertEquals(q("b"), 1.0)
+    assertEquals(p("w"), 3.0)
+    intercept[IllegalArgumentException](p.updated("nope", 1.0))
+    intercept[NoSuchElementException](p("nope"))
   }
 
   test("save / parse で往復できる") {

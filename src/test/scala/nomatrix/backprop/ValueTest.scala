@@ -1,4 +1,4 @@
-package nomatrix.autograd
+package nomatrix.backprop
 
 class ValueTest extends munit.FunSuite:
 

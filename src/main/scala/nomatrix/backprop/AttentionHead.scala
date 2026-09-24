@@ -1,10 +1,12 @@
-package nomatrix.nn
+package nomatrix.backprop
 
-import nomatrix.vec.Vec
+import nomatrix.nn.Params
+
+
 import scala.util.Random
 
 /** トークンごとのベクトルの列。文（トークン列）を通した後の「各トークンの状態」。 */
-type Tokens = Vector[Vec]
+type Tokens = Vector[GVec]
 
 /** 注意（attention）ひとつ分。
   *
@@ -16,22 +18,15 @@ type Tokens = Vector[Vec]
   */
 final case class AttentionHead(query: Dense, key: Dense, value: Dense, headDim: Int):
 
-  /** トークン i が、自分以前の各トークンにどれだけ注目するか（合計 1）。 */
-  def weights(xs: Tokens, i: Int): Vec =
-    val qs = xs.map(query(_))
-    val ks = xs.map(key(_))
-    val scale = 1.0 / math.sqrt(headDim.toDouble)
-    Vec.softmax((0 to i).toVector.map(j => Vec.dot(qs(i), ks(j)) * scale))
-
   def apply(xs: Tokens): Tokens =
     val qs = xs.map(query(_))
     val ks = xs.map(key(_))
     val vs = xs.map(value(_))
     val scale = 1.0 / math.sqrt(headDim.toDouble)
     xs.indices.toVector.map { i =>
-      val scores = (0 to i).toVector.map(j => Vec.dot(qs(i), ks(j)) * scale)
-      val w = Vec.softmax(scores)
-      (0 to i).map(j => Vec.scale(vs(j), w(j))).reduce(Vec.add)
+      val scores = (0 to i).toVector.map(j => GVec.dot(qs(i), ks(j)) * scale)
+      val weights = GVec.softmax(scores)
+      (0 to i).map(j => GVec.scale(vs(j), weights(j))).reduce(GVec.add)
     }
 
 object AttentionHead:
@@ -41,7 +36,7 @@ object AttentionHead:
       Dense.init(s"$prefix.key", dModel, headDim, rng) ++
       Dense.init(s"$prefix.value", dModel, headDim, rng)
 
-  def load(p: Params, prefix: String, dModel: Int, headDim: Int): AttentionHead =
+  def load(p: ParamValues, prefix: String, dModel: Int, headDim: Int): AttentionHead =
     AttentionHead(
       Dense.load(p, s"$prefix.query", dModel, headDim),
       Dense.load(p, s"$prefix.key", dModel, headDim),

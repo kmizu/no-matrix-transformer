@@ -1,6 +1,8 @@
-package nomatrix.nn
+package nomatrix.backprop
 
-import nomatrix.vec.Vec
+import nomatrix.nn.Params
+
+
 import scala.util.Random
 
 /** Transformer ブロック。
@@ -14,8 +16,8 @@ final case class Block(norm1: LayerNorm, attention: MultiHead, norm2: LayerNorm,
 
   def apply(xs: Tokens): Tokens =
     val mixed = attention(xs.map(norm1(_)))
-    val afterAttention = xs.zip(mixed).map(Vec.add)
-    afterAttention.map(x => Vec.add(x, feedForward(norm2(x))))
+    val afterAttention = xs.zip(mixed).map(GVec.add)
+    afterAttention.map(x => GVec.add(x, feedForward(norm2(x))))
 
 object Block:
 
@@ -25,7 +27,7 @@ object Block:
       LayerNorm.init(s"$prefix.norm2", dModel) ++
       FeedForward.init(s"$prefix.ff", dModel, hidden, rng)
 
-  def load(p: Params, prefix: String, dModel: Int, heads: Int, hidden: Int): Block =
+  def load(p: ParamValues, prefix: String, dModel: Int, heads: Int, hidden: Int): Block =
     Block(
       LayerNorm.load(p, s"$prefix.norm1", dModel),
       MultiHead.load(p, s"$prefix.attn", dModel, heads),

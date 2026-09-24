@@ -1,6 +1,7 @@
-package nomatrix.gen
+package nomatrix.backprop
 
-import nomatrix.model.{Config, Transformer}
+import nomatrix.model.Config
+
 import scala.util.Random
 
 class GeneratorTest extends munit.FunSuite:
@@ -22,18 +23,26 @@ class GeneratorTest extends munit.FunSuite:
   }
 
   test("温度 0 なら最大のロジットを選ぶ") {
-    assertEquals(Generator.sample(Vector(0.1, 5.0, -2.0), temperature = 0.0, new Random(0)), 1)
+    val logits = GVec.fromDoubles(Seq(0.1, 5.0, -2.0))
+    assertEquals(Generator.sample(logits, temperature = 0.0, new Random(0)), 1)
   }
 
   test("温度 1 のサンプリングは分布に従う") {
+    val logits = GVec.fromDoubles(Seq(0.0, 10.0))
     val rng = new Random(7)
-    val picks = (1 to 200).map(_ => Generator.sample(Vector(0.0, 10.0), temperature = 1.0, rng))
+    val picks = (1 to 200).map(_ => Generator.sample(logits, temperature = 1.0, rng))
     assert(picks.count(_ == 1) > 190)
+    assert(picks.count(_ == 0) < 10)
   }
 
-  test("温度が極端でも落ちない: 極小は argmax、NaN と空プロンプトは例外") {
-    val logits = Vector(0.1, 5.0, -2.0)
+  test("温度が極端でも落ちない: 極小は argmax、空プロンプトは例外") {
+    val logits = GVec.fromDoubles(Seq(0.1, 5.0, -2.0))
     assertEquals(Generator.sample(logits, temperature = 1e-320, new Random(0)), 1)
     intercept[IllegalArgumentException](Generator.sample(logits, temperature = Double.NaN, new Random(0)))
-    intercept[IllegalArgumentException](Generator.generate(cfg, Transformer.init(cfg, new Random(1)), Vector.empty, 1, 1.0, new Random(0)))
+    val p = Transformer.init(cfg, new Random(1))
+    intercept[IllegalArgumentException](Generator.generate(cfg, p, Vector.empty, 1, 1.0, new Random(0)))
+  }
+
+  test("不正な形式のパラメータ文字列は例外") {
+    intercept[IllegalArgumentException](nomatrix.nn.Params.parse("a.w0 1.0\nbroken"))
   }

@@ -1,11 +1,10 @@
-package nomatrix.model
+package nomatrix.backprop
 
-import nomatrix.nn.*
-import nomatrix.vec.Vec
+import nomatrix.model.Config
+import nomatrix.nn.Params
+
 import scala.util.Random
 
-/** モデルの大きさを決める数。 */
-final case class Config(vocabSize: Int, dModel: Int, heads: Int, layers: Int, context: Int, hidden: Int)
 
 /** Transformer 言語モデル。
   *
@@ -20,15 +19,12 @@ final case class Transformer(
     head: Dense
 ):
 
-  /** 入口: 文字の埋め込みに位置の埋め込みを足したもの。 */
-  def embed(ids: Vector[Int]): Tokens =
-    require(ids.length <= cfg.context, s"長さ ${ids.length} は context=${cfg.context} を超えている")
-    require(ids.forall(id => id >= 0 && id < cfg.vocabSize), "語彙の範囲外の id がある")
-    ids.zipWithIndex.map((id, pos) => Vec.add(tokenEmbedding(id), positionEmbedding(pos)))
-
   /** 各位置について「次のトークンは何か」のスコア（ロジット）を返す。 */
   def logits(ids: Vector[Int]): Tokens =
-    val hidden = blocks.foldLeft(embed(ids))((xs, block) => block(xs))
+    require(ids.length <= cfg.context, s"長さ ${ids.length} は context=${cfg.context} を超えている")
+    require(ids.forall(id => id >= 0 && id < cfg.vocabSize), "語彙の範囲外の id がある")
+    val embedded = ids.zipWithIndex.map((id, pos) => GVec.add(tokenEmbedding(id), positionEmbedding(pos)))
+    val hidden = blocks.foldLeft(embedded)((xs, block) => block(xs))
     hidden.map(x => head(finalNorm(x)))
 
 object Transformer:
@@ -41,7 +37,7 @@ object Transformer:
       LayerNorm.init("norm", cfg.dModel) ++
       Dense.init("head", cfg.dModel, cfg.vocabSize, rng)
 
-  def load(cfg: Config, p: Params): Transformer =
+  def load(cfg: Config, p: ParamValues): Transformer =
     Transformer(
       cfg,
       Embedding.load(p, "tok", cfg.vocabSize, cfg.dModel),

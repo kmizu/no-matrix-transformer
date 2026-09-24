@@ -1,4 +1,4 @@
-package nomatrix.train
+package nomatrix.backprop
 
 import nomatrix.nn.Params
 

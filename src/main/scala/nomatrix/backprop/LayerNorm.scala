@@ -1,15 +1,17 @@
-package nomatrix.nn
+package nomatrix.backprop
 
-import nomatrix.vec.Vec
+import nomatrix.nn.Params
+
+
 
 /** LayerNorm = 数の並びを平均 0・分散 1 に整えてから、要素ごとにゲインとバイアスをかける。 */
-final case class LayerNorm(gain: Vec, bias: Vec):
-  def apply(x: Vec): Vec = Vec.add(Vec.mul(gain, Vec.layerNorm(x)), bias)
+final case class LayerNorm(gain: GVec, bias: GVec):
+  def apply(x: GVec): GVec = GVec.add(GVec.mul(gain, GVec.layerNorm(x)), bias)
 
 object LayerNorm:
 
-  def gainName(prefix: String, d: Int): String = s"$prefix.g$d"
-  def biasName(prefix: String, d: Int): String = s"$prefix.b$d"
+  private def gainName(prefix: String, d: Int) = s"$prefix.g$d"
+  private def biasName(prefix: String, d: Int) = s"$prefix.b$d"
 
   /** ゲイン 1・バイアス 0 から始める（＝最初は素の layerNorm）。 */
   def init(prefix: String, dim: Int): Params =
@@ -17,7 +19,7 @@ object LayerNorm:
     val biases = (0 until dim).map(d => biasName(prefix, d) -> 0.0)
     Params((gains ++ biases).toMap)
 
-  def load(p: Params, prefix: String, dim: Int): LayerNorm =
+  def load(p: ParamValues, prefix: String, dim: Int): LayerNorm =
     LayerNorm(
       (0 until dim).toVector.map(d => p(gainName(prefix, d))),
       (0 until dim).toVector.map(d => p(biasName(prefix, d)))

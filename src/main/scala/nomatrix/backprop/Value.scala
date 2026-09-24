@@ -1,4 +1,4 @@
-package nomatrix.autograd
+package nomatrix.backprop
 
 /** 微分できる「ひとつの数」。
   *
@@ -7,7 +7,7 @@ package nomatrix.autograd
   *
   * 行列もベクトルも登場しない。ここにあるのはスカラーと、そのつながりだけ。
   */
-final class Value private[autograd] (
+final class Value private[backprop] (
     val data: Double,
     val inputs: Vector[(Value, Double)],
     val label: String
@@ -55,7 +55,7 @@ object Value:
   /** 名前付きの葉ノード。学習するパラメータに使う。 */
   def leaf(d: Double, label: String): Value = new Value(d, Vector.empty, label)
 
-  private[autograd] def node(d: Double, inputs: Vector[(Value, Double)]): Value =
+  private[backprop] def node(d: Double, inputs: Vector[(Value, Double)]): Value =
     new Value(d, inputs, "")
 
   /** たくさんの数の合計。ひとつのノードにまとめるのでグラフが浅く保たれる。 */
@@ -92,5 +92,5 @@ object Value:
     out.result()
 
 /** 逆伝播の結果。ノードを渡すと、そのノードに対する微分を返す。 */
-final class Gradients private[autograd] (private val map: java.util.IdentityHashMap[Value, java.lang.Double]):
+final class Gradients private[backprop] (private val map: java.util.IdentityHashMap[Value, java.lang.Double]):
   def apply(v: Value): Double = map.getOrDefault(v, 0.0).doubleValue
