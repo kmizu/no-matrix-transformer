@@ -1,11 +1,11 @@
-# 第6章 位置を知る
+# 第5章 位置を知る
 
 ## 注意は順番を見ない
 
 次の章で作る「注意」は、文中のすべてのトークンを平等に眺めます。
 「ねこが ねる」と「ねる が ねこ」を区別する材料が、そのままではほとんどありません。
 トークンの中身しか見ないからです。
-（第7章の「未来を見ない」制約で「自分より前に何個あるか」は間接的に分かりますが、「何番目か」そのものは伝わりません。）
+（第6章の「未来を見ない」制約で「自分より前に何個あるか」は間接的に分かりますが、「何番目か」そのものは伝わりません。）
 
 だから、**「自分は何番目か」を各トークンに教える**必要があります。
 
@@ -20,14 +20,14 @@ import nomatrix.vec.Vec
 import scala.util.Random
 
 val rng = new Random(0)
-val tokenTable = Embedding.load(Embedding.init("tok", count = 5, dim = 4, rng).lift, "tok", 5, 4)
-val posTable   = Embedding.load(Embedding.init("pos", count = 8, dim = 4, rng).lift, "pos", 8, 4)
+val tokenTable = Embedding.load(Embedding.init("tok", count = 5, dim = 4, rng), "tok", 5, 4)
+val posTable   = Embedding.load(Embedding.init("pos", count = 8, dim = 4, rng), "pos", 8, 4)
 
 val ids = Vector(3, 1, 3)   // 同じトークン 3 が 0 番目と 2 番目に出てくる
 val embedded = ids.zipWithIndex.map((id, pos) => Vec.add(tokenTable(id), posTable(pos)))
 
-Vec.data(embedded(0))
-Vec.data(embedded(2))
+embedded(0)
+embedded(2)
 ```
 
 同じ文字「3」でも、0 番目と 2 番目では違うベクトルになりました。
@@ -65,7 +65,7 @@ flowchart LR
   add --> x["各トークンのベクトル<br/>Vector[Vec]"]
 ```
 
-第10章の `Transformer.logits` の最初の 1 行が、まさにこれです。
+第9章の `Transformer.logits` の最初の 1 行が、まさにこれです。
 
 ```scala
 val embedded = ids.zipWithIndex.map((id, pos) => Vec.add(tokenEmbedding(id), positionEmbedding(pos)))

@@ -1,4 +1,4 @@
-# 第9章 FeedForward・残差・LayerNorm
+# 第8章 FeedForward・残差・LayerNorm
 
 注意は「トークン同士で情報を混ぜる」部品でした。
 Transformer のブロックは、それにあと 3 つの部品を組み合わせてできています。
@@ -21,8 +21,8 @@ import nomatrix.nn.*
 import nomatrix.vec.Vec
 import scala.util.Random
 
-val ff = FeedForward.load(FeedForward.init("ff", dModel = 3, hidden = 6, new Random(3)).lift, "ff", 3, 6)
-Vec.data(ff(Vec.fromDoubles(Seq(1.0, -1.0, 0.5))))
+val ff = FeedForward.load(FeedForward.init("ff", dModel = 3, hidden = 6, new Random(3)), "ff", 3, 6)
+ff(Vector(1.0, -1.0, 0.5))
 ```
 
 `hidden` は `dModel` の 2〜4 倍にするのが慣例です。この本では 16 → 32 → 16。
@@ -38,13 +38,13 @@ val afterAttention = xs.zip(mixed).map(Vec.add)
 これが残差接続です。理由は 2 つあります。
 
 1. **学習しやすい**: 部品は「入力をどう変えるか（差分）」だけ学べばよい。最初は何もしなくても入力がそのまま通る。
-2. **勾配が届く**: 逆伝播のとき、足し算の枝を通って勾配がそのまま入力側へ流れる。層を重ねても消えない。
+2. **信号が届く**: 入口の数を少し動かしたとき、足し算の枝を通ってその変化がそのまま出口まで届く。層を重ねても薄まらない。
 
 `Vec.add` するだけ。行列も、特別な仕組みも要りません。
 
 ## LayerNorm: 入口で整える
 
-第3章の `layerNorm`（平均 0・分散 1）に、次元ごとのゲインとバイアスを付けたものです。
+第2章の `layerNorm`（平均 0・分散 1）に、次元ごとのゲインとバイアスを付けたものです。
 
 ```scala
 final case class LayerNorm(gain: Vec, bias: Vec):
@@ -88,9 +88,9 @@ flowchart TB
 ## 動かしてみる
 
 ```scala mdoc
-val block = Block.load(Block.init("b0", dModel = 4, heads = 2, hidden = 8, new Random(4)).lift, "b0", 4, 2, 8)
-val xs = Vector(Seq(1.0, 2.0, 3.0, 4.0), Seq(4.0, 3.0, 2.0, 1.0)).map(Vec.fromDoubles)
-block(xs).map(Vec.data)
+val block = Block.load(Block.init("b0", dModel = 4, heads = 2, hidden = 8, new Random(4)), "b0", 4, 2, 8)
+val xs = Vector(Vector(1.0, 2.0, 3.0, 4.0), Vector(4.0, 3.0, 2.0, 1.0))
+block(xs)
 ```
 
 入力の形（2 トークン × 4 次元）が保たれています。だから何段でも積めます。
@@ -111,7 +111,7 @@ block(xs).map(Vec.data)
 
 !!! tip "この章のまとめ"
     - FeedForward = 広げて、折り曲げて、戻す。トークンごとに独立
-    - 残差 = 入力を足す。学習しやすく、勾配が届く
+    - 残差 = 入力を足す。学習しやすく、変化が出口まで届く
     - LayerNorm = 部品の入口で整える
     - ブロックは形を保つので、何段でも積める
 

@@ -1,4 +1,4 @@
-# 第4章 ニューロンと Dense
+# 第3章 ニューロンと Dense
 
 ここが、普通の解説なら「線形層 \( y = Wx + b \)」と行列で書かれる場所です。
 この本では行列を使いません。代わりに**ニューロン**という言葉で書きます。
@@ -13,12 +13,10 @@
 \]
 
 ```scala mdoc
-import nomatrix.autograd.Value
-import nomatrix.vec.Vec
 import nomatrix.nn.*
 
-val neuron = Neuron(weights = Vec.fromDoubles(Seq(1.0, -2.0, 0.5)), bias = Value(0.1))
-neuron(Vec.fromDoubles(Seq(2.0, 1.0, 4.0))).data   // 1*2 + (-2)*1 + 0.5*4 + 0.1
+val neuron = Neuron(weights = Vector(1.0, -2.0, 0.5), bias = 0.1)
+neuron(Vector(2.0, 1.0, 4.0))   // 1*2 + (-2)*1 + 0.5*4 + 0.1
 ```
 
 ## Dense = ニューロンの集まり
@@ -62,28 +60,27 @@ params.names.toVector.sorted
 `layer.n1.w2` は「`layer` という Dense の、1 番目のニューロンの、2 番目の重み」です。
 行列の「1 行 2 列」ではなく、**誰の何番目の重みか**が名前で分かります。
 
-順伝播のときは、この辞書の数を `Value` に持ち上げて（`lift`）、`Dense.load` でニューロンに組み立てます。
+この辞書から `Dense.load` でニューロンを組み立てます。
 
 ```scala mdoc
-val pv = params.lift
-val dense = Dense.load(pv, "layer", in = 3, out = 2)
-val y = dense(Vec.fromDoubles(Seq(1.0, 0.0, -1.0)))
-Vec.data(y)
+val dense = Dense.load(params, "layer", in = 3, out = 2)
+val x = Vector(1.0, 0.0, -1.0)
+dense(x)
 ```
 
-## 勾配も名前で受け取る
+## 名前で動かす
 
-逆伝播の結果を `ParamValues.gradients` に通すと、「名前 → 勾配」の辞書になります。
+学習とは「この辞書の数を変えること」です。試しに、ひとつの重みを名前で指定して 1.0 だけ増やしてみます。
 
 ```scala mdoc
-val loss = Value.sum(y)
-val grads = pv.gradients(Value.gradients(loss))
-grads("layer.n0.b")     // バイアスの勾配は 1
-grads("layer.n0.w0")    // 0 番目の重みの勾配 = 入力の 0 番目 = 1.0
-grads("layer.n0.w2")    // 2 番目の重みの勾配 = 入力の 2 番目 = -1.0
+val nudged = params.updated("layer.n0.w2", params("layer.n0.w2") + 1.0)
+Dense.load(nudged, "layer", in = 3, out = 2)(x)
 ```
 
-「重みの勾配は、対応する入力そのもの」という基本が、名前つきで確かめられます。
+0 番目のニューロンの出力だけが、入力の 2 番目（-1.0）× 1.0 = -1.0 だけ動きました。
+1 番目のニューロンは、自分の重みが変わっていないので動いていません。
+「どの数を動かすと、出力のどこがどれだけ動くか」が、名前つきで追えます。
+第11章の学習は、この「動かして見る」を全パラメータで繰り返すだけです。
 
 ## 初期値について
 
@@ -104,6 +101,6 @@ grads("layer.n0.w2")    // 2 番目の重みの勾配 = 入力の 2 番目 = -1.
 !!! tip "この章のまとめ"
     - ニューロン = 内積 + バイアス。Dense = ニューロンの並び
     - 「行列とベクトルの積」は「ニューロンがそれぞれ内積を取る」の別名
-    - パラメータは名前付きの数の辞書。勾配も名前で受け取る
+    - パラメータは名前付きの数の辞書。名前で動かせる
 
 次は、文字を数の並びに変える「埋め込み」です。

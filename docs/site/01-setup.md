@@ -25,25 +25,30 @@ sbt test
 
 ```text
 src/main/scala/nomatrix/
-├── autograd/Value.scala     微分できる数（第2章）
-├── vec/Vec.scala            数の並びの操作（第3章）
+├── vec/Vec.scala            数の並びの操作（第2章）
 ├── nn/
-│   ├── Params.scala         名前付きの数の集まり（第4章）
-│   ├── Dense.scala          ニューロン（第4章）
-│   ├── Embedding.scala      埋め込み（第5-6章）
-│   ├── AttentionHead.scala  注意（第7章）
-│   ├── MultiHead.scala      複数ヘッド（第8章）
-│   ├── FeedForward.scala    FeedForward（第9章）
-│   ├── LayerNorm.scala      LayerNorm（第9章）
-│   └── Block.scala          ブロック（第9章）
-├── model/Transformer.scala  全体（第10章）
-├── data/                    トークナイザとコーパス（第5章）
-├── train/                   損失・Adam・学習ループ（第11章）
+│   ├── Params.scala         名前付きの数の集まり（第3章）
+│   ├── Dense.scala          ニューロン（第3章）
+│   ├── Embedding.scala      埋め込み（第4-5章）
+│   ├── AttentionHead.scala  注意（第6章）
+│   ├── MultiHead.scala      複数ヘッド（第7章）
+│   ├── FeedForward.scala    FeedForward（第8章）
+│   ├── LayerNorm.scala      LayerNorm（第8章）
+│   └── Block.scala          ブロック（第8章）
+├── model/
+│   ├── Transformer.scala    全体（第9章）
+│   └── FastTransformer.scala 同じ計算の配列版（第11章）
+├── data/                    トークナイザとコーパス（第4章）
+├── train/
+│   ├── Loss.scala           損失（第10章）
+│   ├── Evolution.scala      ゆらぎ学習（第11章）
+│   └── Trainer.scala        学習ループ（第11章）
 ├── gen/Generator.scala      生成（第12章）
-└── Main.scala               CLI（第13章）
+├── Main.scala               CLI（第13章）
+└── backprop/                付録: 微分できる数で書き直したもの
 ```
 
-ひとつのファイルは 30〜100 行です。全部足しても 700 行ほどです。
+本線（`backprop/` 以外）はひとつのファイルが 30〜120 行、全部足しても 700 行ほどです。
 
 ## このサイトのコードについて
 
@@ -57,14 +62,15 @@ val x = 1 + 2
 
 コードが変われば出力も変わります。「説明と実物がずれている」ことが起きない仕組みです。
 
-## 「行列を使わない」の定義
+## 「行列を使わない」「微分を使わない」の定義
 
 この本での約束を、もう少し正確に決めておきます。
 
 - **使わない**: 2 次元配列（`Array[Array[Double]]` など）、行列型、行列積・転置などの行列演算
-- **使う**: ひとつの数 `Double`、微分できる数 `Value`、数の並び `Vector[Value]`
+- **使う**: ひとつの数 `Double`、数の並び `Vector[Double]`
+- **本線では使わない**: 微分。学習は「少し動かして試す」だけで行う。微分を使う速い学習法は付録に隔離する
 
-「トークンごとにベクトルがある」ので、`Vector[Vector[Value]]` という形のデータは登場します。
+「トークンごとにベクトルがある」ので、`Vector[Vector[Double]]` という形のデータは登場します。
 でもそれは「文の各位置に、数の並びがひとつずつある」というだけで、行列としては扱いません。
 行列積を書きたくなる場面は、すべて「ニューロンが並んでいる」「似ている度合いを測る」という言葉で書きます。
 
@@ -74,4 +80,4 @@ val x = 1 + 2
 --8<-- "src/test/scala/nomatrix/NoMatrixTest.scala"
 ```
 
-次は、すべての土台になる「微分できる数」を作ります。
+次は、すべての土台になる「数の並び」から始めます。

@@ -44,19 +44,20 @@ theme:
 nav:
   - はじめに: index.md
   - 第1章 準備: 01-setup.md
-  - 第2章 微分できる数: 02-value.md
-  - 第3章 ベクトルは数の並び: 03-vec.md
-  - 第4章 ニューロンと Dense: 04-dense.md
-  - 第5章 トークンと埋め込み: 05-embedding.md
-  - 第6章 位置を知る: 06-position.md
-  - 第7章 注意: 07-attention.md
-  - 第8章 複数の視点: 08-multihead.md
-  - 第9章 FeedForward・残差・LayerNorm: 09-block.md
-  - 第10章 ブロックを積む: 10-transformer.md
-  - 第11章 損失と学習: 11-training.md
+  - 第2章 ベクトルは数の並び: 02-vec.md
+  - 第3章 ニューロンと Dense: 03-dense.md
+  - 第4章 トークンと埋め込み: 04-embedding.md
+  - 第5章 位置を知る: 05-position.md
+  - 第6章 注意: 06-attention.md
+  - 第7章 複数の視点: 07-multihead.md
+  - 第8章 FeedForward・残差・LayerNorm: 08-block.md
+  - 第9章 ブロックを積む: 09-transformer.md
+  - 第10章 損失: 10-loss.md
+  - 第11章 学習（微分なし）: 11-learning.md
   - 第12章 文章を生成する: 12-generate.md
   - 第13章 実際に学習させる: 13-experiment.md
-  - 第14章 行列はどこにいたのか: 14-epilogue.md
+  - 第14章 行列と微分はどこにいたのか: 14-epilogue.md
+  - 付録 微分で速くする: 15-backprop.md
 
 markdown_extensions:
   - admonition

@@ -1,14 +1,14 @@
-# 第3章 ベクトルは数の並び
+# 第2章 ベクトルは数の並び
 
 「ベクトル」と聞くと矢印や座標を思い浮かべるかもしれませんが、
 このチュートリアルではもっと素朴に扱います。**ベクトルとは、数が並んだもの**です。
 
 ```scala
-type Vec = Vector[Value]
+type Vec = Vector[Double]
 ```
 
-これだけです。`Vector` は Scala の不変なリスト。その中身が「微分できる数」なので、
-ベクトルに対する操作はすべて逆伝播できます。
+これだけです。`Vector` は Scala の不変なリスト。中身はただの数（`Double`）です。
+特別な型も、ライブラリも要りません。
 
 ## 使う操作は 6 つ
 
@@ -24,14 +24,13 @@ Transformer を作るのに必要なベクトル操作は、驚くほど少な�
 | `layerNorm(v)` | 平均 0・分散 1 に整える | ブロックの入口 |
 
 ```scala mdoc
-import nomatrix.autograd.Value
 import nomatrix.vec.Vec
 
-val a = Vec.fromDoubles(Seq(1.0, 2.0, 3.0))
-val b = Vec.fromDoubles(Seq(4.0, 5.0, 6.0))
+val a = Vector(1.0, 2.0, 3.0)
+val b = Vector(4.0, 5.0, 6.0)
 
-Vec.data(Vec.add(a, b))
-Vec.dot(a, b).data
+Vec.add(a, b)
+Vec.dot(a, b)
 ```
 
 ## 内積 = 「似ている度合い」
@@ -47,16 +46,16 @@ Vec.dot(a, b).data
 逆向きなら合計は負になります。関係がなければゼロの近くをうろつきます。
 
 ```scala mdoc
-val same     = Vec.fromDoubles(Seq(1.0, 1.0, -1.0))
-val opposite = Vec.fromDoubles(Seq(-1.0, -1.0, 1.0))
-val unrelated = Vec.fromDoubles(Seq(1.0, -1.0, 0.0))
+val same      = Vector(1.0, 1.0, -1.0)
+val opposite  = Vector(-1.0, -1.0, 1.0)
+val unrelated = Vector(1.0, -1.0, 0.0)
 
-Vec.dot(same, same).data
-Vec.dot(same, opposite).data
-Vec.dot(same, unrelated).data
+Vec.dot(same, same)
+Vec.dot(same, opposite)
+Vec.dot(same, unrelated)
 ```
 
-第7章の「注意」は、この内積で「どのトークンに注目するか」を決めます。
+第6章の「注意」は、この内積で「どのトークンに注目するか」を決めます。
 
 ## softmax = 「割合にする」
 
@@ -68,8 +67,8 @@ Vec.dot(same, unrelated).data
 \]
 
 ```scala mdoc
-Vec.data(Vec.softmax(Vec.fromDoubles(Seq(1.0, 2.0, 3.0))))
-Vec.data(Vec.softmax(Vec.fromDoubles(Seq(1.0, 2.0, 10.0))))
+Vec.softmax(Vector(1.0, 2.0, 3.0))
+Vec.softmax(Vector(1.0, 2.0, 10.0))
 ```
 
 実装では、`exp` する前に最大値を引いています。
@@ -82,7 +81,7 @@ softmax の値は「差」だけで決まるので、全部から同じ数を引
 層を重ねると数のスケールが暴れやすいので、各ブロックの入口で整えます。
 
 ```scala mdoc
-val n = Vec.data(Vec.layerNorm(Vec.fromDoubles(Seq(10.0, 20.0, 30.0, 40.0))))
+val n = Vec.layerNorm(Vector(10.0, 20.0, 30.0, 40.0))
 n.sum / n.size                                     // 平均 ≈ 0
 n.map(x => x * x).sum / n.size                     // 分散 ≈ 1
 ```
@@ -96,22 +95,8 @@ n.map(x => x * x).sum / n.size                     // 分散 ≈ 1
 `zip` して `map` する。`sum` する。それだけです。
 「行列」という言葉が出てこないだけでなく、出てくる余地がありません。
 
-## 微分もついてくる
-
-`Vec` の操作は `Value` の操作の組み合わせなので、何もしなくても逆伝播できます。
-
-```scala mdoc
-val v = Vec.fromDoubles(Seq(0.2, -0.5, 1.1))
-val s = Vec.softmax(v)
-val y = s(2)                       // 3 番目の割合
-val g = Value.gradients(y)
-v.map(g(_))                        // 各入力を少し増やすと 3 番目の割合はどう変わるか
-```
-
-3 番目の入力を増やすと割合は増え（正）、他を増やすと減る（負）。直感どおりです。
-
 !!! tip "この章のまとめ"
-    - ベクトル = `Vector[Value]`、数の並び
+    - ベクトル = `Vector[Double]`、数の並び
     - 内積 = かけて足す = 似ている度合い
     - softmax = 割合にする、layerNorm = 整える
 

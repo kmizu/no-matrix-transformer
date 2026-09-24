@@ -1,18 +1,17 @@
-# 第10章 ブロックを積む：Transformer
+# 第9章 ブロックを積む：Transformer
 
 部品が揃いました。組み立てます。
 
 ## 全体の流れ
 
-1. 文字の埋め込み + 位置の埋め込み（第5-6章）
-2. ブロック × `layers`（第9章）
+1. 文字の埋め込み + 位置の埋め込み（第4-5章）
+2. ブロック × `layers`（第8章）
 3. 最後に LayerNorm で整える
 4. 語彙の数だけニューロンを並べた `Dense` で、「次の文字はどれか」のスコア（**ロジット**）を出す
 
 ```scala
 def logits(ids: Vector[Int]): Tokens =
-  val embedded = ids.zipWithIndex.map((id, pos) => Vec.add(tokenEmbedding(id), positionEmbedding(pos)))
-  val hidden = blocks.foldLeft(embedded)((xs, block) => block(xs))
+  val hidden = blocks.foldLeft(embed(ids))((xs, block) => block(xs))
   hidden.map(x => head(finalNorm(x)))
 ```
 
@@ -30,7 +29,7 @@ flowchart TB
 
 入力が 3 トークンなら、出力も 3 本のベクトルです。
 位置 \( i \) のロジットは「位置 \( i \) までを見たとき、位置 \( i+1 \) は何か」の予測です。
-学習では全位置を同時に使い（第11章）、生成では最後の位置だけを使います（第12章）。
+学習では全位置を同時に使い（第10-11章）、生成では最後の位置だけを使います（第12章）。
 
 ## Config: モデルの大きさ
 
@@ -53,18 +52,16 @@ final case class Config(vocabSize: Int, dModel: Int, heads: Int, layers: Int, co
 
 ```scala mdoc
 import nomatrix.model.*
-import nomatrix.nn.*
-import nomatrix.vec.Vec
 import scala.util.Random
 
 val cfg = Config(vocabSize = 7, dModel = 4, heads = 2, layers = 2, context = 5, hidden = 8)
 val params = Transformer.init(cfg, new Random(5))
 params.size
 
-val model = Transformer.load(cfg, params.lift)
+val model = Transformer.load(cfg, params)
 val out = model.logits(Vector(1, 2, 3))
 out.length
-out.map(v => Vec.data(v).map(d => f"$d%.3f"))
+out.map(_.map(d => f"$d%.3f"))
 ```
 
 3 トークン入れて、各位置に 7 個（語彙数）のスコアが出ました。まだ学習していないので意味はありません。
@@ -91,22 +88,21 @@ Transformer.init(real, new Random(0)).names
 
 ブロック 1 つあたり約 2,200 個。埋め込みと出力ヘッドは語彙数に比例します。
 
-## 勾配は端から端まで届く
+## ひとつの数が、端から端まで効く
 
-損失をひとつ作って逆伝播すると、出力ヘッドから埋め込みまで、すべてのパラメータに勾配が届きます。
+パラメータをひとつ動かすと、出力は変わるでしょうか。
+いちばん入口にある「トークン 1 の埋め込みの 0 番目」を少し動かして、最後のロジットを見比べます。
 
 ```scala mdoc
-import nomatrix.autograd.Value
-
-val pv = params.lift
-val loss = Value.sum(Transformer.load(cfg, pv).logits(Vector(0, 1)).flatten)
-val g = pv.gradients(Value.gradients(loss))
-g("head.n0.b")
-g("tok.t1.d0")
-g("block0.attn.head0.query.n0.w0")
+val before = model.logits(Vector(1, 2))(1)
+val moved = params.updated("tok.t1.d0", params("tok.t1.d0") + 0.5)
+val after = Transformer.load(cfg, moved).logits(Vector(1, 2))(1)
+before.zip(after).map((b, a) => f"${a - b}%+.3f")
 ```
 
-第2章で作った `Value` が、Transformer 全体を貫いて働いています。
+位置 1 の出力は、注意を通じて位置 0（トークン 1）の情報を受け取っているので、
+入口の数ひとつが 2 段のブロックを通り抜けて出口まで届いています。
+第11章の学習は、この「動かすと出力が変わる」を使って、損失が下がる方へ数を寄せていきます。
 
 ## 実装を読む
 
@@ -119,6 +115,6 @@ g("block0.attn.head0.query.n0.w0")
 !!! tip "この章のまとめ"
     - 埋め込み → ブロックを `foldLeft` → LayerNorm → 語彙ぶんのニューロン
     - 出力は各位置ごとの「次の文字のスコア」
-    - パラメータは約 7,000 個、すべて名前付きの数
+    - パラメータは約 7,000 個、すべて名前付きの数。ひとつ動かせば出口まで効く
 
-次は、このモデルに「正しい次の文字」を教える方法、損失と学習です。
+次は、このモデルの答えに点数をつける「損失」です。

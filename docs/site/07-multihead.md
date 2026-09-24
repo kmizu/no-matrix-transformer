@@ -1,8 +1,8 @@
-# 第8章 複数の視点：Multi-Head
+# 第7章 複数の視点：Multi-Head
 
 ## ひとつの注意では足りない
 
-第7章の注意ヘッドは、「query と key が似ているトークン」に注目します。
+第6章の注意ヘッドは、「query と key が似ているトークン」に注目します。
 でも、注目したい理由はひとつではありません。
 
 - 直前の文字（「ね」の次は「こ」か「る」か）
@@ -50,9 +50,9 @@ import scala.util.Random
 val params = MultiHead.init("mh", dModel = 4, heads = 2, new Random(2))
 params.size
 
-val mh = MultiHead.load(params.lift, "mh", dModel = 4, heads = 2)
-val xs = Vector.fill(3)(Vec.fromDoubles(Seq(0.1, -0.2, 0.3, 0.4)))
-mh(xs).map(Vec.data)
+val mh = MultiHead.load(params, "mh", dModel = 4, heads = 2)
+val xs = Vector.fill(3)(Vector(0.1, -0.2, 0.3, 0.4))
+mh(xs)
 ```
 
 パラメータ数の内訳を確かめておきます。ヘッドあたり query / key / value の Dense が 3 つ（4→2 が 3 つで各 10 個）、

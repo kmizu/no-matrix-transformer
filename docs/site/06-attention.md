@@ -1,4 +1,4 @@
-# 第7章 注意：似ているものを混ぜる
+# 第6章 注意：似ているものを混ぜる
 
 Transformer の名前の由来になった論文のタイトルは "Attention Is All You Need" でした。
 この章では、その「注意（attention）」を行列なしで書きます。
@@ -27,7 +27,7 @@ val vs = xs.map(value(_))
 ## ステップ 2: 似ている度合いを測る
 
 トークン \( i \) の query と、トークン \( j \) の key の**内積**を取ります。
-第3章で見たとおり、内積は「似ている度合い」です。
+第2章で見たとおり、内積は「似ている度合い」です。
 探しているもの（query）と持っているもの（key）が合っていれば、大きな値になります。
 
 \[
@@ -91,15 +91,15 @@ import nomatrix.vec.Vec
 import scala.util.Random
 
 val params = AttentionHead.init("h", dModel = 4, headDim = 2, new Random(1))
-val head = AttentionHead.load(params.lift, "h", dModel = 4, headDim = 2)
+val head = AttentionHead.load(params, "h", dModel = 4, headDim = 2)
 
 val xs = Vector(
-  Seq(1.0, 0.0, 0.0, 1.0),
-  Seq(0.0, 1.0, 1.0, 0.0),
-  Seq(0.5, 0.5, 0.5, 0.5)
-).map(Vec.fromDoubles)
+  Vector(1.0, 0.0, 0.0, 1.0),
+  Vector(0.0, 1.0, 1.0, 0.0),
+  Vector(0.5, 0.5, 0.5, 0.5)
+)
 
-head(xs).map(Vec.data)
+head(xs)
 ```
 
 3 トークン入れると、3 本の（headDim = 2 の）ベクトルが出てきます。
@@ -110,9 +110,9 @@ head(xs).map(Vec.data)
 未来を見ていない証拠です。
 
 ```scala mdoc
-val xs2 = xs.updated(2, Vec.fromDoubles(Seq(-3.0, 2.0, 9.0, -1.0)))
-val before = head(xs).map(Vec.data)
-val after  = head(xs2).map(Vec.data)
+val xs2 = xs.updated(2, Vector(-3.0, 2.0, 9.0, -1.0))
+val before = head(xs)
+val after  = head(xs2)
 
 before(0) == after(0)
 before(1) == after(1)

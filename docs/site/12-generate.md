@@ -37,7 +37,7 @@ import nomatrix.gen.Generator
 import nomatrix.vec.Vec
 import scala.util.Random
 
-val logits = Vec.fromDoubles(Seq(1.0, 3.0, 2.0))
+val logits = Vector(1.0, 3.0, 2.0)
 
 def histogram(temperature: Double): Map[Int, Int] =
   val rng = new Random(0)

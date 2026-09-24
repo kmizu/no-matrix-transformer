@@ -1,4 +1,4 @@
-# 第5章 トークンと埋め込み
+# 第4章 トークンと埋め込み
 
 言語モデルは文字列を直接は扱えません。数の並びにする必要があります。
 その入口が**トークナイザ**と**埋め込み**です。
@@ -29,7 +29,7 @@ Corpus.text.linesIterator.take(3).mkString("\n")
 ```
 
 !!! note "単語やサブワードでなく文字を使う理由"
-    語彙が小さければ、出力側のニューロン（第10章）も少なくて済み、CPU で学習できます。
+    語彙が小さければ、出力側のニューロン（第9章）も少なくて済み、CPU で学習できます。
     トークナイザの方式は Transformer 本体とは独立なので、後から差し替えられます。
 
 ## 埋め込み = 番号から数の並びを引く
@@ -53,8 +53,8 @@ import scala.util.Random
 val params = Embedding.init("tok", count = 4, dim = 3, new Random(0))
 params.names.toVector.sorted.take(6)
 
-val emb = Embedding.load(params.lift, "tok", count = 4, dim = 3)
-Vec.data(emb(2))
+val emb = Embedding.load(params, "tok", count = 4, dim = 3)
+emb(2)
 ```
 
 `tok.t2.d1` は「2 番のトークンの、1 番目の次元」。
