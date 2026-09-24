@@ -129,10 +129,11 @@ val (params, _, log) = (1 to steps).foldLeft(start) { case ((p, state, log), ste
 
 `foldLeft` がループで、状態はすべて引数として渡されます。どこにも `var` がありません。
 
-!!! note "2 つの工夫"
-    `Evolution.Settings` には `groups`（パラメータを組に分けて、指定した組だけをゆらす）と
-    `lineSearch`（向きが決まったあと、歩幅を半分・そのまま・倍で試して一番良いものを採る）があります。
-    どちらも順伝播しか使いません。効き目は第14章で測っています。
+!!! note "速くするための工夫"
+    `Evolution.Settings` には、順伝播しか使わない工夫がいくつか入っています。
+    `groups`（組に分けて、指定した組だけをゆらす）、`lineSearch`（歩幅を半分・そのまま・倍で試す）、
+    `orthogonal`（ゆらぎ同士を直交させる）、`rademacher`（±1 のゆらぎ）、`newton`（3 点で曲率を測る）、
+    `parallel`（評価を並列に走らせる）。どれが効いてどれが効かなかったかは、第14章と付録Bで測っています。
 
 !!! note "速い順伝播"
     1 ステップに順伝播を 100 回以上呼ぶので、学習では `FastTransformer` という配列版の順伝播を使っています。

@@ -69,6 +69,26 @@ class EvolutionTest extends munit.FunSuite:
     assert(math.abs(searched(0) - 1.0) <= math.abs(plain(0) - 1.0) + 0.1, s"plain=${plain(0)} searched=${searched(0)}")
   }
 
+  test("並列評価は逐次評価と同じ結果になる（乱数は逐次に引くので決定的）") {
+    val lossOf = (p: Array[Double]) => p.zipWithIndex.map((x, i) => (x - i) * (x - i)).sum
+    val start = Array(5.0, 5.0, 5.0, 5.0)
+    val serial = Evolution.step(start, lossOf, Evolution.Settings(pairs = 8, sigma = 0.1, lr = 0.05), Evolution.State.initial(4), new Random(3))._1
+    val parallel = Evolution.step(start, lossOf, Evolution.Settings(pairs = 8, sigma = 0.1, lr = 0.05, parallel = true), Evolution.State.initial(4), new Random(3))._1
+    assertEquals(parallel.toVector, serial.toVector)
+  }
+
+  test("直交化・±1・曲率のゆらぎでも最小点へ向かう") {
+    val lossOf = (p: Array[Double]) => (p(0) - 1.0) * (p(0) - 1.0) + (p(1) + 2.0) * (p(1) + 2.0)
+    for settings <- Vector(
+        Evolution.Settings(pairs = 8, sigma = 0.1, lr = 0.02, orthogonal = true),
+        Evolution.Settings(pairs = 8, sigma = 0.1, lr = 0.02, rademacher = true),
+        Evolution.Settings(pairs = 8, sigma = 0.1, lr = 0.02, newton = true))
+    do
+      val end = minimize(lossOf, Array(5.0, 5.0), settings, 1200)
+      assertEqualsDouble(end(0), 1.0, 0.3, settings.toString)
+      assertEqualsDouble(end(1), -2.0, 0.3, settings.toString)
+  }
+
   test("ステップは試したゆらぎの平均損失を返す") {
     val (_, _, mean) = Evolution.step(Array(0.0), p => p(0) * p(0), Evolution.Settings(pairs = 4, sigma = 1.0), Evolution.State.initial(1), new Random(1))
     assert(mean > 0.0)

@@ -100,24 +100,39 @@ final class FastTransformer(val cfg: Config):
       out
     }
 
-  def logits(p: Array[Double], ids: Vector[Int]): Vector[Array[Double]] =
-    var xs = ids.zipWithIndex.map((id, i) => tok(p, id).zip(pos(p, i)).map(_ + _))
-    for b <- blocks do
-      val normed = xs.map(b.norm1(p, _))
-      val perHead = b.heads.map((q, k, v) => attention(p, q, k, v, normed))
-      val mixed = Vector.tabulate(xs.length)(i => b.output(p, perHead.map(_(i)).reduce(_ ++ _)))
-      val afterAttention = xs.zip(mixed).map((x, m) => x.zip(m).map(_ + _))
-      xs = afterAttention.map { x =>
-        val ff = b.down(p, b.up(p, b.norm2(p, x)).map(v => math.max(0.0, v)))
-        x.zip(ff).map(_ + _)
-      }
-    xs.map(x => head(p, norm(p, x)))
+  private def runBlock(p: Array[Double], b: BlockIx, xs: Vector[Array[Double]]): Vector[Array[Double]] =
+    val normed = xs.map(b.norm1(p, _))
+    val perHead = b.heads.map((q, k, v) => attention(p, q, k, v, normed))
+    val mixed = Vector.tabulate(xs.length)(i => b.output(p, perHead.map(_(i)).reduce(_ ++ _)))
+    val afterAttention = xs.zip(mixed).map((x, m) => x.zip(m).map(_ + _))
+    afterAttention.map { x =>
+      val ff = b.down(p, b.up(p, b.norm2(p, x)).map(v => math.max(0.0, v)))
+      x.zip(ff).map(_ + _)
+    }
 
-  def loss(p: Array[Double], window: Vector[Int]): Double =
-    val out = logits(p, window.dropRight(1))
-    val targets = window.drop(1)
+  /** 埋め込みから `upTo` 個のブロックを通したあとの、各トークンの状態。 */
+  def hiddenAfter(p: Array[Double], ids: Vector[Int], upTo: Int): Vector[Array[Double]] =
+    val embedded = ids.zipWithIndex.map((id, i) => tok(p, id).zip(pos(p, i)).map(_ + _))
+    blocks.take(upTo).foldLeft(embedded)((xs, b) => runBlock(p, b, xs))
+
+  /** 途中の状態 `hidden`（ブロック `from` の入力）から最後まで通して、損失を出す。 */
+  def lossFrom(p: Array[Double], hidden: Vector[Array[Double]], from: Int, targets: Vector[Int]): Double =
+    val xs = blocks.drop(from).foldLeft(hidden)((h, b) => runBlock(p, b, h))
+    lossOfLogits(xs.map(x => head(p, norm(p, x))), targets)
+
+  /** 途中の状態にそのまま仕上げ（LayerNorm と head）を当てて損失を出す。ブロックごとの局所損失に使う。 */
+  def readoutLoss(p: Array[Double], hidden: Vector[Array[Double]], targets: Vector[Int]): Double =
+    lossOfLogits(hidden.map(x => head(p, norm(p, x))), targets)
+
+  def logits(p: Array[Double], ids: Vector[Int]): Vector[Array[Double]] =
+    hiddenAfter(p, ids, blocks.length).map(x => head(p, norm(p, x)))
+
+  private def lossOfLogits(out: Vector[Array[Double]], targets: Vector[Int]): Double =
     var total = 0.0
     for (l, t) <- out.zip(targets) do
       val shift = l.max
       total += math.log(l.map(x => math.exp(x - shift)).sum) + shift - l(t)
     total / targets.length
+
+  def loss(p: Array[Double], window: Vector[Int]): Double =
+    lossOfLogits(logits(p, window.dropRight(1)), window.drop(1))

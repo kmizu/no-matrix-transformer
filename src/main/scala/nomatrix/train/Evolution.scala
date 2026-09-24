@@ -19,12 +19,42 @@ object Evolution:
       useAdam: Boolean = true,
       ranks: Boolean = false,
       groups: Vector[Vector[Int]] = Vector.empty,
-      lineSearch: Boolean = false
+      lineSearch: Boolean = false,
+      parallel: Boolean = false,
+      rademacher: Boolean = false,
+      orthogonal: Boolean = false,
+      newton: Boolean = false
   )
 
   final case class State(step: Int, m: Array[Double], v: Array[Double])
   object State:
     def initial(size: Int): State = State(0, new Array[Double](size), new Array[Double](size))
+
+  /** ゆらぎ同士を直交させる（Gram–Schmidt）。同じ方向を二度試す無駄が減る。長さは元のまま。 */
+  private def orthogonalize(noises: Vector[Array[Double]]): Vector[Array[Double]] =
+    def dot(a: Array[Double], b: Array[Double]): Double =
+      var s = 0.0
+      var i = 0
+      while i < a.length do
+        s += a(i) * b(i)
+        i += 1
+      s
+    val out = Vector.newBuilder[Array[Double]]
+    val done = scala.collection.mutable.ArrayBuffer.empty[(Array[Double], Double)] // (直交化済みのゆらぎ, その長さの二乗)
+    for noise <- noises do
+      val v = noise.clone()
+      val originalNorm = math.sqrt(dot(v, v))
+      for (u, squared) <- done do
+        val p = dot(v, u) / squared
+        var i = 0
+        while i < v.length do
+          v(i) -= p * u(i)
+          i += 1
+      val norm = math.sqrt(dot(v, v))
+      val result = if norm < 1e-12 then noise else v.map(_ * originalNorm / norm)
+      done += ((result, dot(result, result)))
+      out += result
+    out.result()
 
   /** 1 ステップ。`lossOf` は「このパラメータならどれだけ外すか」。返り値は (新パラメータ, 状態, 試したゆらぎの平均損失)。 */
   def step(params: Array[Double], lossOf: Array[Double] => Double, s: Settings, state: State, rng: Random): (Array[Double], State, Double) =
@@ -33,12 +63,20 @@ object Evolution:
     val active = Array.fill(n)(s.groups.isEmpty)
     if s.groups.nonEmpty then s.groups(state.step % s.groups.length).foreach(i => active(i) = true)
 
-    val noises = Array.fill(s.pairs)(Array.tabulate(n)(i => if active(i) then rng.nextGaussian() else 0.0))
-    val scores = noises.map { noise =>
+    // ゆらぎ: 正規乱数か、±1（SPSA / Rademacher）
+    val drawn = Vector.fill(s.pairs)(Array.tabulate(n) { i =>
+      if !active(i) then 0.0 else if s.rademacher then (if rng.nextBoolean() then 1.0 else -1.0) else rng.nextGaussian()
+    })
+    val noises = if s.orthogonal then orthogonalize(drawn) else drawn
+    val evaluate = (noise: Array[Double]) =>
       val plus = Array.tabulate(n)(i => params(i) + s.sigma * noise(i))
       val minus = Array.tabulate(n)(i => params(i) - s.sigma * noise(i))
       (lossOf(plus), lossOf(minus))
-    }
+    // 評価は互いに独立なので、並列にできる（行列と同じ「同じ計算を同時にやる」）
+    val scores: Vector[(Double, Double)] =
+      if s.parallel then
+        java.util.stream.IntStream.range(0, s.pairs).parallel().mapToObj(k => evaluate(noises(k))).toArray.toVector.map(_.asInstanceOf[(Double, Double)])
+      else noises.map(evaluate)
     // 各ゆらぎの「+側と−側の差」。差が正ならゆらぎの逆向きが良い
     val raw = scores.map((lp, lm) => (lp - lm) / (2 * s.sigma))
     val weights =
@@ -46,7 +84,14 @@ object Evolution:
         val order = raw.indices.sortBy(raw(_))
         val w = new Array[Double](s.pairs)
         for (k, r) <- order.zipWithIndex do w(k) = (r.toDouble / (s.pairs - 1) - 0.5) * 2
-        w
+        w.toVector
+      else if s.newton then
+        // 3 点 (+, 0, −) で方向ごとの曲率を測り、曲率が大きい方向は控えめに、小さい方向は大胆に
+        val center = lossOf(params)
+        val curvature = scores.map((lp, lm) => (lp - 2 * center + lm) / (s.sigma * s.sigma))
+        val positive = curvature.filter(_ > 0)
+        val floor = if positive.isEmpty then 1.0 else positive.sum / positive.length * 0.1
+        raw.zip(curvature).map((g, c) => g / math.max(c, floor))
       else raw
     val direction = new Array[Double](n)
     for k <- 0 until s.pairs do

@@ -58,6 +58,7 @@ nav:
   - 第13章 実際に学習させる: 13-experiment.md
   - 第14章 行列と微分はどこにいたのか: 14-epilogue.md
   - 付録 傾きを測ってつなぐ: 15-backprop.md
+  - 付録B さらに速くするには: 16-faster.md
 
 markdown_extensions:
   - admonition
